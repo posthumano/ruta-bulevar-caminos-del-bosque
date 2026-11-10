@@ -88,8 +88,8 @@
 
   <div id="info-panel">
     <div class="badge" id="step-badge">Paso 1 de 3</div>
-    <h2 id="step-title">Paso 1: Av. Suba desde Bulevar Niza hasta 21 Ángeles</h2>
-    <p id="step-desc">Iniciamos en el C.C. Bulevar Niza (Calle 127) y tomamos toda la Avenida Suba hacia el norte, pasando bajo el puente de la Av. Boyacá hasta llegar a 21 Ángeles.</p>
+    <h2 id="step-title">Paso 1: Salida Bulevar Niza por Av. Suba</h2>
+    <p id="step-desc">Salimos del C.C. Bulevar Niza y tomamos toda la Avenida Suba hacia el norte, pasando bajo el puente de la Av. Boyacá hasta llegar frente a la estación 21 Ángeles.</p>
     <div class="actions">
       <button class="btn btn-secondary" onclick="prevStep()">Anterior</button>
       <button class="btn btn-primary" onclick="nextStep()">Siguiente paso ➡️</button>
@@ -101,53 +101,52 @@
     // Inicializar mapa
     const map = L.map('map', { zoomControl: true });
 
-    // Capa nítida de CartoDB (siempre muestra calles, avenidas y nombres con alto contraste)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    // OpenStreetMap estándar (sin marcas de agua, sin claves de API)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      subdomains: 'abcd',
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Coordenadas verificadas en Bogotá
-    const coordBulevar = [4.7115, -74.0722];     // C.C. Bulevar Niza (Av. Suba con Calle 127)
-    const coordRetorno = [4.7335, -74.0845];     // Estación 21 Ángeles y curva de retorno
-    const coordDestino = [4.7298, -74.0845];     // Portería Camino del Bosque
+    // Coordenadas reales
+    const coordBulevar = [4.7088, -74.0716]; // Entrada Bulevar Niza sobre Calle 127
+    const coordRetorno = [4.7314, -74.0844]; // Estación 21 Ángeles y retorno
+    const coordDestino = [4.7298, -74.0845]; // Camino del Bosque
 
     // Definición de las 3 etapas secuenciales
     const steps = [
       {
         badge: "Paso 1 de 3",
         title: "Paso 1: Av. Suba desde Bulevar Niza hasta 21 Ángeles",
-        desc: "Iniciamos en el C.C. Bulevar Niza (Calle 127) y recorremos toda la Avenida Suba hacia el norte, pasando por debajo del puente de la Av. Boyacá hasta la estación 21 Ángeles.",
+        desc: "Salimos del C.C. Bulevar Niza hacia la Calle 127 y avanzamos por toda la Avenida Suba hacia el norte, cruzando bajo el puente de la Av. Boyacá hasta llegar frente a 21 Ángeles.",
         bounds: [
-          [4.7100, -74.0710], // Bulevar Niza
-          [4.7350, -74.0860]  // 21 Ángeles
+          [4.7070, -74.0710],
+          [4.7330, -74.0860]
         ]
       },
       {
         badge: "Paso 2 de 3",
         title: "Paso 2: Retorno en Estación 21 Ángeles",
-        desc: "Frente a la estación 21 Ángeles salimos a la derecha junto a la bomba de gasolina para tomar el retorno en 'U' y empalmar con la vía de subida a la montaña.",
-        coords: [4.7335, -74.0845],
+        desc: "Al llegar a la estación 21 Ángeles, salimos por el costado derecho junto a la bomba de gasolina para tomar el retorno en 'U' y conectar hacia la vía de la montaña.",
+        coords: [4.7314, -74.0844],
         zoom: 17
       },
       {
         badge: "Paso 3 de 3",
         title: "Paso 3: Subida a Camino del Bosque",
-        desc: "Desde la salida del retorno, subimos por la vía local junto al Parque Cerro del Tabor hasta llegar a la portería de Camino del Bosque.",
+        desc: "Tomamos la vía que bordea el Parque Cerro del Tabor hasta llegar a la portería del Conjunto Camino del Bosque.",
         coords: [4.7298, -74.0845],
         zoom: 18
       }
     ];
 
-    // Marcadores con etiquetas fijas en los puntos exactos
-    const m1 = L.marker(coordBulevar).addTo(map)
+    // Marcadores con nombres legibles
+    L.marker(coordBulevar).addTo(map)
       .bindTooltip("1. Inicio: C.C. Bulevar Niza", { permanent: true, direction: "top", className: "custom-label" });
 
-    const m2 = L.marker(coordRetorno).addTo(map)
+    L.marker(coordRetorno).addTo(map)
       .bindTooltip("2. Retorno 21 Ángeles", { permanent: true, direction: "right", className: "custom-label" });
 
-    const m3 = L.marker(coordDestino).addTo(map)
+    L.marker(coordDestino).addTo(map)
       .bindTooltip("3. Destino: Camino del Bosque", { permanent: true, direction: "top", className: "custom-label" });
 
     let currentStep = 0;
@@ -159,13 +158,13 @@
       document.getElementById('step-desc').innerText = s.desc;
 
       if (s.bounds) {
-        map.fitBounds(s.bounds, { padding: [40, 40], duration: 1.5 });
+        map.fitBounds(s.bounds, { padding: [35, 35], duration: 1.5 });
       } else {
         map.flyTo(s.coords, s.zoom, { duration: 1.5 });
       }
     }
 
-    // Cargar Paso 1
+    // Inicializar en el Paso 1
     applyStep(0);
 
     function nextStep() {
