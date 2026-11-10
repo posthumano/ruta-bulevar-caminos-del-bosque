@@ -21,30 +21,30 @@ HTML
       width: 100%;
     }
     #info-panel {
-      padding: 18px 20px;
+      padding: 16px 20px;
       background: #ffffff;
-      box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
-      border-top: 3px solid #d4af37;
+      box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.12);
+      border-top: 4px solid #d4af37;
     }
     .badge {
       display: inline-block;
-      padding: 4px 10px;
+      padding: 4px 12px;
       font-size: 13px;
-      font-weight: bold;
+      font-weight: 700;
       color: #0b1a30;
       background: #eef2f8;
-      border-radius: 4px;
-      margin-bottom: 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
     }
     h2 {
       margin: 0 0 6px 0;
-      font-size: 19px;
+      font-size: 18px;
       color: #0b1a30;
     }
     p {
-      margin: 0 0 16px 0;
+      margin: 0 0 14px 0;
       font-size: 15px;
-      color: #4a5568;
+      color: #374151;
       line-height: 1.4;
     }
     .actions {
@@ -55,7 +55,7 @@ HTML
       flex: 1;
       padding: 12px;
       font-size: 15px;
-      font-weight: 600;
+      font-weight: 700;
       border: none;
       border-radius: 8px;
       cursor: pointer;
@@ -67,8 +67,12 @@ HTML
       color: #ffffff;
     }
     .btn-secondary {
-      background: #e2e8f0;
-      color: #1a202c;
+      background: #e5e7eb;
+      color: #1f2937;
+    }
+    .leaflet-popup-content {
+      font-size: 14px;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -78,8 +82,8 @@ HTML
 
   <div id="info-panel">
     <div class="badge" id="step-badge">Paso 1 de 3</div>
-    <h2 id="step-title">Salida: Bulevar Niza</h2>
-    <p id="step-desc">Salimos del centro comercial e ingresamos a la Av. Suba hacia el norte.</p>
+    <h2 id="step-title">Salida: C.C. Bulevar Niza</h2>
+    <p id="step-desc">Salida hacia la Av. Calle 127 para incorporarse a la Av. Suba rumbo norte.</p>
     <div class="actions">
       <button class="btn btn-secondary" onclick="prevStep()">Anterior</button>
       <button class="btn btn-primary" onclick="nextStep()">Siguiente paso ➡️</button>
@@ -88,43 +92,81 @@ HTML
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Inicializar mapa centrado en Bulevar Niza
-    const map = L.map('map', { zoomControl: false }).setView([4.712, -74.072], 16);
+    // Inicialización del mapa en Bulevar Niza con zoom adecuado
+    const map = L.map('map', { zoomControl: true }).setView([4.7088, -74.0716], 16);
 
-    // Capa de mapa directa y 100% gratuita de OpenStreetMap (sin API Key)
+    // Mosaicos limpios de OpenStreetMap
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Definición de las 3 etapas guiadas
+    // Trazado de la ruta resaltada en la vía (Línea azul ancha de alto contraste)
+    const routeCoordinates = [
+      [4.7088, -74.0716], // Bulevar Niza
+      [4.7105, -74.0722], // Conexión Calle 127
+      [4.7142, -74.0735], // Av. Suba hacia el norte
+      [4.7245, -74.0792], // Paso bajo Av. Boyacá
+      [4.7308, -74.0841], // Estación 21 Ángeles
+      [4.7318, -74.0850], // Giro y retorno junto a la bomba
+      [4.7332, -74.0862], // Conexión hacia Carrera 87
+      [4.7348, -74.0871], // Subida por Cra. 87
+      [4.7362, -74.0877]  // Portería Camino del Bosque (Cra. 87 # 131C - 89)
+    ];
+
+    // Borde exterior oscuro para dar efecto de relieve a la vía
+    L.polyline(routeCoordinates, {
+      color: '#071526',
+      weight: 9,
+      opacity: 0.9,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // Vía principal resaltada en azul brillante
+    L.polyline(routeCoordinates, {
+      color: '#1d72b8',
+      weight: 6,
+      opacity: 1.0,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+
+    // Definición de pasos con enfoque ampliado en cada hito
     const steps = [
       {
         badge: "Paso 1 de 3",
         title: "Salida: C.C. Bulevar Niza",
-        desc: "Tomamos la Av. Suba en sentido norte (hacia el sector de Suba).",
-        coords: [4.712, -74.072],
+        desc: "Salimos hacia la Calle 127 y tomamos la Av. Suba rumbo al norte.",
+        coords: [4.7095, -74.0720],
         zoom: 16
       },
       {
         badge: "Paso 2 de 3",
-        title: "Giro clave: 21 Ángeles",
-        desc: "Pasando la estación 21 Ángeles, tomamos el retorno a la derecha junto a la bomba de gasolina.",
-        coords: [4.733, -74.083],
+        title: "Retorno: Estación 21 Ángeles",
+        desc: "Al pasar la estación 21 Ángeles tomamos la derecha junto a la bomba de gasolina para tomar el retorno.",
+        coords: [4.7312, -74.0846],
         zoom: 17
       },
       {
         badge: "Paso 3 de 3",
-        title: "Destino: Camino del Bosque",
-        desc: "Subimos por la Cra. 87 hasta la portería del conjunto (Cra. 87 # 131C - 89).",
-        coords: [4.736, -74.087],
+        title: "Destino: Conjunto Camino del Bosque",
+        desc: "Subimos por la Cra. 87 hasta la entrada principal (Cra. 87 # 131C - 89).",
+        coords: [4.7362, -74.0877],
         zoom: 18
       }
     ];
 
-    // Marcadores visuales
-    L.marker([4.712, -74.072]).addTo(map).bindPopup("<b>Inicio:</b> Bulevar Niza");
-    L.marker([4.736, -74.087]).addTo(map).bindPopup("<b>Llegada:</b> Camino del Bosque");
+    // Marcadores con texto identificativo en cada punto
+    L.marker([4.7088, -74.0716]).addTo(map)
+      .bindPopup("<b>Inicio:</b> C.C. Bulevar Niza");
+
+    L.marker([4.7312, -74.0846]).addTo(map)
+      .bindPopup("<b>Referencia:</b> 21 Ángeles / Retorno");
+
+    L.marker([4.7362, -74.0877]).addTo(map)
+      .bindPopup("<b>Destino:</b> Conjunto Camino del Bosque<br><small>Cra. 87 # 131C - 89</small>")
+      .openPopup();
 
     let currentStep = 0;
 
