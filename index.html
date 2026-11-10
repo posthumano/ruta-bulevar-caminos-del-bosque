@@ -70,9 +70,16 @@ HTML
       background: #e5e7eb;
       color: #1f2937;
     }
-    .leaflet-popup-content {
-      font-size: 14px;
-      line-height: 1.4;
+    .custom-label {
+      background: #0b1a30;
+      color: #ffffff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      border: 1px solid #d4af37;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      white-space: nowrap;
     }
   </style>
 </head>
@@ -83,7 +90,7 @@ HTML
   <div id="info-panel">
     <div class="badge" id="step-badge">Paso 1 de 3</div>
     <h2 id="step-title">Salida: C.C. Bulevar Niza</h2>
-    <p id="step-desc">Salida hacia la Av. Calle 127 para incorporarse a la Av. Suba rumbo norte.</p>
+    <p id="step-desc">Tomamos la salida hacia la Calle 127 e ingresamos a la calzada de la Av. Suba hacia el norte.</p>
     <div class="actions">
       <button class="btn btn-secondary" onclick="prevStep()">Anterior</button>
       <button class="btn btn-primary" onclick="nextStep()">Siguiente paso ➡️</button>
@@ -92,81 +99,94 @@ HTML
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Inicialización del mapa en Bulevar Niza con zoom adecuado
-    const map = L.map('map', { zoomControl: true }).setView([4.7088, -74.0716], 16);
+    // Inicializar mapa
+    const map = L.map('map', { zoomControl: true }).setView([4.7088, -74.0716], 15);
 
-    // Mosaicos limpios de OpenStreetMap
+    // Mosaicos públicos de OpenStreetMap
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Trazado de la ruta resaltada en la vía (Línea azul ancha de alto contraste)
-    const routeCoordinates = [
-      [4.7088, -74.0716], // Bulevar Niza
-      [4.7105, -74.0722], // Conexión Calle 127
-      [4.7142, -74.0735], // Av. Suba hacia el norte
-      [4.7245, -74.0792], // Paso bajo Av. Boyacá
-      [4.7308, -74.0841], // Estación 21 Ángeles
-      [4.7318, -74.0850], // Giro y retorno junto a la bomba
-      [4.7332, -74.0862], // Conexión hacia Carrera 87
-      [4.7348, -74.0871], // Subida por Cra. 87
-      [4.7362, -74.0877]  // Portería Camino del Bosque (Cra. 87 # 131C - 89)
+    // Trazado exacto calle por calle
+    const routePoints = [
+      // 1. Salida Bulevar Niza y toma de la Av. Suba
+      [4.7078, -74.0706], // Salida Bulevar
+      [4.7092, -74.0718], // Calle 127
+      [4.7107, -74.0725], // Incorporación a Av. Suba rumbo norte
+      [4.7135, -74.0738], // Av. Suba con Calle 128
+      [4.7175, -74.0757], // Av. Suba frente a Niza
+      [4.7210, -74.0775], // Curva hacia Boyacá
+      [4.7248, -74.0795], // Paso por debajo de la Av. Boyacá
+      [4.7285, -74.0817], // Subiendo hacia los Cerros de Suba
+      [4.7305, -74.0833], // Frente a estación 21 Ángeles
+      
+      // 2. Retorno en 21 Ángeles
+      [4.7313, -74.0841], // Salida a la derecha hacia el retorno
+      [4.7317, -74.0847], // Oreja del retorno junto a la bomba de gasolina
+      [4.7314, -74.0853], // Giro completo de retorno
+      [4.7308, -74.0852], // Calzada contraria / Conectante hacia el barrio
+
+      // 3. Desvío hacia la Carrera 87 y llegada a Camino del Bosque
+      [4.7310, -74.0856], // Entrada por Calle 131B / Transversal 86
+      [4.7322, -74.0864], // Empalme con Carrera 87
+      [4.7340, -74.0872], // Carrera 87 ascendiendo
+      [4.7355, -74.0877], // Subida frente a zonas verdes
+      [4.7365, -74.0879]  // Portería Conjunto Camino del Bosque (Cra. 87 # 131C - 89)
     ];
 
-    // Borde exterior oscuro para dar efecto de relieve a la vía
-    L.polyline(routeCoordinates, {
+    // Capa base: Sombra exterior oscura y ancha (simula asfalto delimitado)
+    L.polyline(routePoints, {
       color: '#071526',
-      weight: 9,
+      weight: 10,
       opacity: 0.9,
       lineCap: 'round',
       lineJoin: 'round'
     }).addTo(map);
 
-    // Vía principal resaltada en azul brillante
-    L.polyline(routeCoordinates, {
-      color: '#1d72b8',
+    // Capa principal: Línea azul eléctrico de alto contraste sobre las vías
+    const mainRoute = L.polyline(routePoints, {
+      color: '#0066FF',
       weight: 6,
       opacity: 1.0,
       lineCap: 'round',
       lineJoin: 'round'
     }).addTo(map);
 
-    // Definición de pasos con enfoque ampliado en cada hito
+    // Pasos interactivos con encuadre automático a la sección del camino
     const steps = [
       {
         badge: "Paso 1 de 3",
         title: "Salida: C.C. Bulevar Niza",
-        desc: "Salimos hacia la Calle 127 y tomamos la Av. Suba rumbo al norte.",
+        desc: "Tomamos la salida hacia la Av. Calle 127 e ingresamos a la Av. Suba con sentido norte.",
         coords: [4.7095, -74.0720],
         zoom: 16
       },
       {
         badge: "Paso 2 de 3",
-        title: "Retorno: Estación 21 Ángeles",
-        desc: "Al pasar la estación 21 Ángeles tomamos la derecha junto a la bomba de gasolina para tomar el retorno.",
-        coords: [4.7312, -74.0846],
+        title: "Punto crítico: 21 Ángeles y Retorno",
+        desc: "Al llegar a la estación 21 Ángeles, salimos por la derecha junto a la bomba de gasolina para tomar el retorno.",
+        coords: [4.7313, -74.0846],
         zoom: 17
       },
       {
         badge: "Paso 3 de 3",
         title: "Destino: Conjunto Camino del Bosque",
-        desc: "Subimos por la Cra. 87 hasta la entrada principal (Cra. 87 # 131C - 89).",
-        coords: [4.7362, -74.0877],
+        desc: "Subimos por toda la Cra. 87 hasta la entrada principal (Cra. 87 # 131C - 89).",
+        coords: [4.7358, -74.0878],
         zoom: 18
       }
     ];
 
-    // Marcadores con texto identificativo en cada punto
-    L.marker([4.7088, -74.0716]).addTo(map)
-      .bindPopup("<b>Inicio:</b> C.C. Bulevar Niza");
+    // Marcadores con etiquetas visibles fijas (sin necesidad de tocarlos)
+    L.marker([4.7078, -74.0706]).addTo(map)
+      .bindTooltip("Inicio: Bulevar Niza", { permanent: true, direction: "top", className: "custom-label" });
 
-    L.marker([4.7312, -74.0846]).addTo(map)
-      .bindPopup("<b>Referencia:</b> 21 Ángeles / Retorno");
+    L.marker([4.7313, -74.0841]).addTo(map)
+      .bindTooltip("Retorno 21 Ángeles", { permanent: true, direction: "right", className: "custom-label" });
 
-    L.marker([4.7362, -74.0877]).addTo(map)
-      .bindPopup("<b>Destino:</b> Conjunto Camino del Bosque<br><small>Cra. 87 # 131C - 89</small>")
-      .openPopup();
+    L.marker([4.7365, -74.0879]).addTo(map)
+      .bindTooltip("Destino: Camino del Bosque (Cra. 87 # 131C - 89)", { permanent: true, direction: "top", className: "custom-label" });
 
     let currentStep = 0;
 
