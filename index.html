@@ -88,8 +88,8 @@
 
   <div id="info-panel">
     <div class="badge" id="step-badge">Paso 1 de 3</div>
-    <h2 id="step-title">Paso 1: Desde Bulevar Niza hasta 21 Ángeles</h2>
-    <p id="step-desc">Salimos de Bulevar Niza por la Av. Calle 127 y tomamos toda la Av. Suba rumbo norte, pasando bajo el puente de la Boyacá hacia la estación 21 Ángeles.</p>
+    <h2 id="step-title">Paso 1: Por toda la Av. Suba hacia 21 Ángeles</h2>
+    <p id="step-desc">Salimos de Bulevar Niza y tomamos la calzada principal de la Av. Suba hacia el norte, cruzando bajo el puente de la Boyacá hasta 21 Ángeles.</p>
     <div class="actions">
       <button class="btn btn-secondary" onclick="prevStep()">Anterior</button>
       <button class="btn btn-primary" onclick="nextStep()">Siguiente paso ➡️</button>
@@ -101,41 +101,41 @@
     // Inicializar mapa
     const map = L.map('map', { zoomControl: true });
 
-    // Servidor Esri (nítido, sin bloqueo 403 y sin marcas de agua)
+    // Servidor Esri WorldStreetMap (carga limpia y clara de las vías principales)
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 19,
       attribution: 'Tiles &copy; Esri'
     }).addTo(map);
 
-    // Configuración de los 3 pasos con encuadres y zooms específicos
+    // Definición de las 3 etapas secuenciales
     const steps = [
       {
         badge: "Paso 1 de 3",
-        title: "Paso 1: Desde Bulevar Niza hasta 21 Ángeles",
-        desc: "Salimos de Bulevar Niza hacia la Calle 127 y avanzamos por toda la Av. Suba hacia el norte, cruzando bajo la Boyacá hasta aproximarnos a la estación 21 Ángeles.",
-        // Encuadre que muestra ambos puntos a la vez (Bulevar abajo y 21 Ángeles arriba)
+        title: "Paso 1: Av. Suba desde Bulevar hasta 21 Ángeles",
+        desc: "Salimos de Bulevar Niza y seguimos en sentido norte por toda la Av. Suba principal, pasando por debajo del puente de la Av. Boyacá hasta la estación 21 Ángeles.",
+        // Encuadre ajustado que muestra completa la Av. Suba entre ambos puntos
         bounds: [
-          [4.7070, -74.0725],
-          [4.7325, -74.0850]
+          [4.7075, -74.0710], // Bulevar Niza
+          [4.7315, -74.0848]  // 21 Ángeles
         ]
       },
       {
         badge: "Paso 2 de 3",
-        title: "Paso 2: Retorno en 21 Ángeles y desvío al cerro",
-        desc: "Llegando a la estación 21 Ángeles, tomamos la salida a la derecha junto a la bomba para hacer el retorno en 'U' y empalmar con la vía de acceso hacia la montaña.",
-        coords: [4.7315, -74.0848],
+        title: "Paso 2: Retorno 21 Ángeles y camino medio",
+        desc: "Junto a la estación 21 Ángeles tomamos la derecha para hacer el retorno en 'U' y conectar hacia la vía intermedia de acceso a la montaña.",
+        coords: [4.7310, -74.0852],
         zoom: 17
       },
       {
         badge: "Paso 3 de 3",
         title: "Paso 3: Llegada a Camino del Bosque",
-        desc: "Subimos por la vía local junto al Parque Cerro del Tabor hasta llegar directamente a la portería del Conjunto Camino del Bosque.",
+        desc: "Desde la vía media, subimos por la calle principal del cerro bordeando el Parque Tabor hasta la portería de Camino del Bosque.",
         coords: [4.7298, -74.0845],
         zoom: 18
       }
     ];
 
-    // Marcadores visuales fijos en los puntos clave
+    // Marcadores de referencia fijos
     L.marker([4.7088, -74.0716]).addTo(map)
       .bindTooltip("1. Inicio: Bulevar Niza", { permanent: true, direction: "top", className: "custom-label" });
 
@@ -154,13 +154,13 @@
       document.getElementById('step-desc').innerText = s.desc;
 
       if (s.bounds) {
-        map.fitBounds(s.bounds, { padding: [40, 40], duration: 1.5 });
+        map.fitBounds(s.bounds, { padding: [35, 35], duration: 1.5 });
       } else {
         map.flyTo(s.coords, s.zoom, { duration: 1.5 });
       }
     }
 
-    // Cargar paso 1 de inicio
+    // Ejecución inicial del Paso 1
     applyStep(0);
 
     function nextStep() {
