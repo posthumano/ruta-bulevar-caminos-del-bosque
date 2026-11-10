@@ -13,7 +13,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      background: #fdfbf7;
+      background: #ffffff;
     }
     #map {
       flex: 1;
@@ -72,12 +72,12 @@
     .custom-label {
       background: #0b1a30;
       color: #ffffff;
-      padding: 5px 10px;
-      border-radius: 4px;
+      padding: 6px 12px;
+      border-radius: 6px;
       font-size: 12px;
       font-weight: bold;
       border: 1px solid #d4af37;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       white-space: nowrap;
     }
   </style>
@@ -88,8 +88,8 @@
 
   <div id="info-panel">
     <div class="badge" id="step-badge">Paso 1 de 3</div>
-    <h2 id="step-title">Paso 1: Por toda la Av. Suba hacia 21 Ángeles</h2>
-    <p id="step-desc">Salimos de Bulevar Niza y tomamos la calzada principal de la Av. Suba hacia el norte, cruzando bajo el puente de la Boyacá hasta 21 Ángeles.</p>
+    <h2 id="step-title">Paso 1: Av. Suba desde Bulevar Niza hasta 21 Ángeles</h2>
+    <p id="step-desc">Iniciamos en el C.C. Bulevar Niza (Calle 127) y tomamos toda la Avenida Suba hacia el norte, pasando bajo el puente de la Av. Boyacá hasta llegar a 21 Ángeles.</p>
     <div class="actions">
       <button class="btn btn-secondary" onclick="prevStep()">Anterior</button>
       <button class="btn btn-primary" onclick="nextStep()">Siguiente paso ➡️</button>
@@ -101,48 +101,53 @@
     // Inicializar mapa
     const map = L.map('map', { zoomControl: true });
 
-    // Servidor Esri WorldStreetMap (carga limpia y clara de las vías principales)
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    // Capa nítida de CartoDB (siempre muestra calles, avenidas y nombres con alto contraste)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
-      attribution: 'Tiles &copy; Esri'
+      subdomains: 'abcd',
+      attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
     }).addTo(map);
+
+    // Coordenadas verificadas en Bogotá
+    const coordBulevar = [4.7115, -74.0722];     // C.C. Bulevar Niza (Av. Suba con Calle 127)
+    const coordRetorno = [4.7335, -74.0845];     // Estación 21 Ángeles y curva de retorno
+    const coordDestino = [4.7298, -74.0845];     // Portería Camino del Bosque
 
     // Definición de las 3 etapas secuenciales
     const steps = [
       {
         badge: "Paso 1 de 3",
-        title: "Paso 1: Av. Suba desde Bulevar hasta 21 Ángeles",
-        desc: "Salimos de Bulevar Niza y seguimos en sentido norte por toda la Av. Suba principal, pasando por debajo del puente de la Av. Boyacá hasta la estación 21 Ángeles.",
-        // Encuadre ajustado que muestra completa la Av. Suba entre ambos puntos
+        title: "Paso 1: Av. Suba desde Bulevar Niza hasta 21 Ángeles",
+        desc: "Iniciamos en el C.C. Bulevar Niza (Calle 127) y recorremos toda la Avenida Suba hacia el norte, pasando por debajo del puente de la Av. Boyacá hasta la estación 21 Ángeles.",
         bounds: [
-          [4.7075, -74.0710], // Bulevar Niza
-          [4.7315, -74.0848]  // 21 Ángeles
+          [4.7100, -74.0710], // Bulevar Niza
+          [4.7350, -74.0860]  // 21 Ángeles
         ]
       },
       {
         badge: "Paso 2 de 3",
-        title: "Paso 2: Retorno 21 Ángeles y camino medio",
-        desc: "Junto a la estación 21 Ángeles tomamos la derecha para hacer el retorno en 'U' y conectar hacia la vía intermedia de acceso a la montaña.",
-        coords: [4.7310, -74.0852],
+        title: "Paso 2: Retorno en Estación 21 Ángeles",
+        desc: "Frente a la estación 21 Ángeles salimos a la derecha junto a la bomba de gasolina para tomar el retorno en 'U' y empalmar con la vía de subida a la montaña.",
+        coords: [4.7335, -74.0845],
         zoom: 17
       },
       {
         badge: "Paso 3 de 3",
-        title: "Paso 3: Llegada a Camino del Bosque",
-        desc: "Desde la vía media, subimos por la calle principal del cerro bordeando el Parque Tabor hasta la portería de Camino del Bosque.",
+        title: "Paso 3: Subida a Camino del Bosque",
+        desc: "Desde la salida del retorno, subimos por la vía local junto al Parque Cerro del Tabor hasta llegar a la portería de Camino del Bosque.",
         coords: [4.7298, -74.0845],
         zoom: 18
       }
     ];
 
-    // Marcadores de referencia fijos
-    L.marker([4.7088, -74.0716]).addTo(map)
-      .bindTooltip("1. Inicio: Bulevar Niza", { permanent: true, direction: "top", className: "custom-label" });
+    // Marcadores con etiquetas fijas en los puntos exactos
+    const m1 = L.marker(coordBulevar).addTo(map)
+      .bindTooltip("1. Inicio: C.C. Bulevar Niza", { permanent: true, direction: "top", className: "custom-label" });
 
-    L.marker([4.7314, -74.0844]).addTo(map)
+    const m2 = L.marker(coordRetorno).addTo(map)
       .bindTooltip("2. Retorno 21 Ángeles", { permanent: true, direction: "right", className: "custom-label" });
 
-    L.marker([4.7298, -74.0845]).addTo(map)
+    const m3 = L.marker(coordDestino).addTo(map)
       .bindTooltip("3. Destino: Camino del Bosque", { permanent: true, direction: "top", className: "custom-label" });
 
     let currentStep = 0;
@@ -154,13 +159,13 @@
       document.getElementById('step-desc').innerText = s.desc;
 
       if (s.bounds) {
-        map.fitBounds(s.bounds, { padding: [35, 35], duration: 1.5 });
+        map.fitBounds(s.bounds, { padding: [40, 40], duration: 1.5 });
       } else {
         map.flyTo(s.coords, s.zoom, { duration: 1.5 });
       }
     }
 
-    // Ejecución inicial del Paso 1
+    // Cargar Paso 1
     applyStep(0);
 
     function nextStep() {
