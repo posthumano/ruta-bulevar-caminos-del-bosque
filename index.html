@@ -88,8 +88,8 @@
 
   <div id="info-panel">
     <div class="badge" id="step-badge">Paso 1 de 3</div>
-    <h2 id="step-title">Paso 1: Salida Bulevar Niza por Av. Suba</h2>
-    <p id="step-desc">Tomamos la salida por la Calle 127 y continuamos por toda la Av. Suba en sentido norte pasando bajo la Boyacá.</p>
+    <h2 id="step-title">Paso 1: Desde Bulevar Niza hasta 21 Ángeles</h2>
+    <p id="step-desc">Salimos de Bulevar Niza por la Av. Calle 127 y tomamos toda la Av. Suba rumbo norte, pasando bajo el puente de la Boyacá hacia la estación 21 Ángeles.</p>
     <div class="actions">
       <button class="btn btn-secondary" onclick="prevStep()">Anterior</button>
       <button class="btn btn-primary" onclick="nextStep()">Siguiente paso ➡️</button>
@@ -98,122 +98,79 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Inicializar mapa centrado en el tramo de la Av. Suba
-    const map = L.map('map', { zoomControl: true }).setView([4.7185, -74.0765], 14);
+    // Inicializar mapa
+    const map = L.map('map', { zoomControl: true });
 
-    // Servidor Esri WorldStreetMap: NO bloquea, NO pide API key y carga limpio
+    // Servidor Esri (nítido, sin bloqueo 403 y sin marcas de agua)
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 19,
       attribution: 'Tiles &copy; Esri'
     }).addTo(map);
 
-    // Ruta con 35 puntos exactos siguiendo la calzada real
-    const realRoadPath = [
-      // Salida Bulevar Niza hacia Calle 127
-      [4.7083, -74.0712],
-      [4.7093, -74.0722],
-      // Incorporación a la Av. Suba hacia el norte
-      [4.7108, -74.0728],
-      [4.7126, -74.0736],
-      [4.7145, -74.0744],
-      [4.7165, -74.0754],
-      [4.7182, -74.0763],
-      [4.7198, -74.0772],
-      // Curva previa al puente de la Av. Boyacá
-      [4.7214, -74.0780],
-      [4.7228, -74.0788],
-      [4.7240, -74.0794], // Cruce bajo el puente de la Boyacá
-      [4.7252, -74.0801],
-      // Ascenso por la Av. Suba hacia el cerro
-      [4.7266, -74.0810],
-      [4.7279, -74.0820],
-      [4.7291, -74.0830],
-      [4.7303, -74.0841], // Frente a la estación 21 Ángeles
-
-      // Retorno en U exacto junto a la estación 21 Ángeles
-      [4.7311, -74.0847], // Desvío a la derecha hacia el retorno
-      [4.7315, -74.0851], // Vértice de la curva de retorno
-      [4.7314, -74.0855], // Calzada de regreso en sentido sur
-      [4.7308, -74.0853], // Salida del retorno hacia la conectante local
-
-      // Ingreso hacia la montaña y camino a Camino del Bosque
-      [4.7301, -74.0857], // Desvío hacia la transversal del barrio
-      [4.7294, -74.0859], // Vía local bordeando el Cerro del Tabor
-      [4.7287, -74.0854], // Curva de acceso al sector residencial
-      [4.7282, -74.0847]  // Portería Camino del Bosque
-    ];
-
-    // Capa base exterior oscura para resaltar sobre el fondo
-    L.polyline(realRoadPath, {
-      color: '#071526',
-      weight: 10,
-      opacity: 0.9,
-      lineCap: 'round',
-      lineJoin: 'round'
-    }).addTo(map);
-
-    // Línea interior azul vial brillante
-    L.polyline(realRoadPath, {
-      color: '#0066FF',
-      weight: 6,
-      opacity: 1.0,
-      lineCap: 'round',
-      lineJoin: 'round'
-    }).addTo(map);
-
-    // 3 Etapas interactivas
+    // Configuración de los 3 pasos con encuadres y zooms específicos
     const steps = [
       {
         badge: "Paso 1 de 3",
-        title: "Paso 1: Salida Bulevar Niza por Av. Suba",
-        desc: "Salimos hacia la Calle 127 y tomamos la Av. Suba en sentido norte pasando bajo la Boyacá rumbo al cerro.",
-        coords: [4.7185, -74.0765],
-        zoom: 14 // Vista amplia para ver todo el recorrido de la Av. Suba
+        title: "Paso 1: Desde Bulevar Niza hasta 21 Ángeles",
+        desc: "Salimos de Bulevar Niza hacia la Calle 127 y avanzamos por toda la Av. Suba hacia el norte, cruzando bajo la Boyacá hasta aproximarnos a la estación 21 Ángeles.",
+        // Encuadre que muestra ambos puntos a la vez (Bulevar abajo y 21 Ángeles arriba)
+        bounds: [
+          [4.7070, -74.0725],
+          [4.7325, -74.0850]
+        ]
       },
       {
         badge: "Paso 2 de 3",
-        title: "Paso 2: Retorno en Estación 21 Ángeles",
-        desc: "Llegando a la estación 21 Ángeles, salimos por la derecha para hacer el retorno en 'U' junto a la bomba.",
-        coords: [4.7311, -74.0850],
-        zoom: 17 // Acercamiento directo al retorno
+        title: "Paso 2: Retorno en 21 Ángeles y desvío al cerro",
+        desc: "Llegando a la estación 21 Ángeles, tomamos la salida a la derecha junto a la bomba para hacer el retorno en 'U' y empalmar con la vía de acceso hacia la montaña.",
+        coords: [4.7315, -74.0848],
+        zoom: 17
       },
       {
         badge: "Paso 3 de 3",
         title: "Paso 3: Llegada a Camino del Bosque",
-        desc: "Tomamos la vía local bordeando el Cerro del Tabor hasta la portería de Camino del Bosque.",
-        coords: [4.7285, -74.0852],
-        zoom: 17 // Acercamiento directo a la portería
+        desc: "Subimos por la vía local junto al Parque Cerro del Tabor hasta llegar directamente a la portería del Conjunto Camino del Bosque.",
+        coords: [4.7298, -74.0845],
+        zoom: 18
       }
     ];
 
-    // Marcadores con texto permanente
-    L.marker([4.7083, -74.0712]).addTo(map)
-      .bindTooltip("Inicio: Bulevar Niza", { permanent: true, direction: "top", className: "custom-label" });
+    // Marcadores visuales fijos en los puntos clave
+    L.marker([4.7088, -74.0716]).addTo(map)
+      .bindTooltip("1. Inicio: Bulevar Niza", { permanent: true, direction: "top", className: "custom-label" });
 
-    L.marker([4.7315, -74.0851]).addTo(map)
-      .bindTooltip("Retorno 21 Ángeles", { permanent: true, direction: "right", className: "custom-label" });
+    L.marker([4.7314, -74.0844]).addTo(map)
+      .bindTooltip("2. Retorno 21 Ángeles", { permanent: true, direction: "right", className: "custom-label" });
 
-    L.marker([4.7282, -74.0847]).addTo(map)
-      .bindTooltip("Destino: Camino del Bosque", { permanent: true, direction: "top", className: "custom-label" });
+    L.marker([4.7298, -74.0845]).addTo(map)
+      .bindTooltip("3. Destino: Camino del Bosque", { permanent: true, direction: "top", className: "custom-label" });
 
     let currentStep = 0;
 
-    function updateStep() {
-      const s = steps[currentStep];
+    function applyStep(index) {
+      const s = steps[index];
       document.getElementById('step-badge').innerText = s.badge;
       document.getElementById('step-title').innerText = s.title;
       document.getElementById('step-desc').innerText = s.desc;
-      map.flyTo(s.coords, s.zoom, { duration: 1.5 });
+
+      if (s.bounds) {
+        map.fitBounds(s.bounds, { padding: [40, 40], duration: 1.5 });
+      } else {
+        map.flyTo(s.coords, s.zoom, { duration: 1.5 });
+      }
     }
+
+    // Cargar paso 1 de inicio
+    applyStep(0);
 
     function nextStep() {
       currentStep = (currentStep + 1) % steps.length;
-      updateStep();
+      applyStep(currentStep);
     }
 
     function prevStep() {
       currentStep = (currentStep - 1 + steps.length) % steps.length;
-      updateStep();
+      applyStep(currentStep);
     }
   </script>
 </body>
