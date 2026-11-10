@@ -91,10 +91,10 @@ HTML
     // Inicializar mapa centrado en Bulevar Niza
     const map = L.map('map', { zoomControl: false }).setView([4.712, -74.072], 16);
 
-    // Capa de mapa limpia y elegante (CartoDB Positron)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    // Capa de mapa directa y 100% gratuita de OpenStreetMap (sin API Key)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
     // Definición de las 3 etapas guiadas
